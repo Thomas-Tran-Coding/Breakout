@@ -12,16 +12,23 @@ var breakOutGame = (function () {
     var privateContext;
 	var privateCanvas;
     
-	var GAME_WIDTH = 600;
+	var GAME_WIDTH = 500;
 	var GAME_HEIGHT = 500;
+    
 	var BRICK_ROWS = 5;
 	var BRICK_COLUMNS = 13;
-	var BALLSIZE = 10;
-	var BRICK_WIDTH = 40;
+    var BRICK_WIDTH = 40;
 	var BRICK_HEIGHT = 10;
-    var yPosBall = breakoutcanvas.height -30;
-    var xPosBall = breakoutcanvas.width/2;
     
+    var PADDLE_HEIGHT = 10;
+    var PADDLE_WIDTH = 70;
+    var PLAY_PADDLE = (GAME_WIDTH - PADDLE_WIDTH)/2;
+    var rightKeyPressed = false;
+    var leftKeyPressed = false;
+    
+	var BALLSIZE = 10;
+	var yPosBall = GAME_HEIGHT -30;
+    var xPosBall = GAME_WIDTH/2;
     var xMoveSpeed  = 2;
     var yMoveSpeed = -2;
     
@@ -29,17 +36,39 @@ var breakOutGame = (function () {
 	var bricks = [];
 	var paddle;
 	var ball;
-/*
+ /*   
 	function privateDraw() {
         console.log("Drawing!");
-        privateContext.clearRect(0, 0, breakoutcanvas.width, breakoutcanvas.height);
+        ball.draw();
         ball.bounceHorizontally();
         ball.bounceVertically();
         ball.update();
-        ball.draw();
-        window.requestAnimationFrame(privateDraw);
+        setInterval(privateDraw,10); // using the draw function every 10 milliseconds 
 	}
 */
+    
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+    
+    function keyDownHandler(event) {    //   gedrückter Knopf
+        if(event.keyCode == 39) {
+            rightKeyPressed = true;
+        }
+        else if(event.keyCode == 37) {
+            leftKeyPressed = true;
+        }
+    }
+    
+    function keyUpHandler(event) {      // losgelassener Knopf
+        if(event.keyCode == 39) {
+            rightKeyPressed = false;
+        }
+        else if(event.keyCode == 37) {
+            leftKeyPressed = false;
+        }
+    }
+    
+    
 	function privateSetContext(canvas) {
 		privateCanvas = canvas;
 		privateContext = canvas.getContext("2d");
@@ -48,10 +77,9 @@ var breakOutGame = (function () {
 	function publicInit(canvas, difficulty) {
         console.log("Breakout, here we go!");
 		privateSetContext(canvas);
-        
-		window.requestAnimationFrame(privateDraw); // (privatedraw) // (draw)
+        privateContext.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        setInterval(draw,10); // using the draw function every 10 milliseconds 
 	}
-  
     
     function drawBall() {
         privateContext.beginPath();
@@ -62,20 +90,45 @@ var breakOutGame = (function () {
     }
 
     function draw() {
-        privateContext.clearRect(0, 0, breakoutcanvas.width, breakoutcanvas.height);
+        privateContext.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         drawBall();
-        if (yPosBall + yMoveSpeed < BALLSIZE  || yPosBall + yMoveSpeed > breakoutcanvas.height - BALLSIZE) {// implementing "bounce" 
-           yMoveSpeed = -xMoveSpeed;                                                                        // for the ball -> top and bottom
+        drawPaddle();
+        if (yPosBall + yMoveSpeed < BALLSIZE){// implementing "bounce" effect
+           yMoveSpeed = -xMoveSpeed;
         }
-        if (xPosBall + xMoveSpeed < BALLSIZE || xPosBall + xMoveSpeed > breakoutcanvas.width - BALLSIZE) {  // same for left and right
+        else if( yPosBall + yMoveSpeed > GAME_HEIGHT - BALLSIZE) {
+            if(xPosBall > PLAY_PADDLE && xPosBall < PLAY_PADDLE * PADDLE_WIDTH) {
+                yMoveSpeed = -yMoveSpeed;
+            }
+            else {
+                alert("LARRY CONFIRMED!!!");
+                document.location.reload();
+            }
+        }
+        
+        if (xPosBall + xMoveSpeed < BALLSIZE || xPosBall + xMoveSpeed > GAME_WIDTH - BALLSIZE) { // same for left and right
            xMoveSpeed = yMoveSpeed;
         }
+        if(rightKeyPressed && PLAY_PADDLE < GAME_WIDTH - PADDLE_WIDTH) {
+           PLAY_PADDLE += 8;
+        }
+        if(leftKeyPressed && PLAY_PADDLE > 0) {
+            PLAY_PADDLE -= 8;
+        }
+        
         xPosBall += xMoveSpeed;
         yPosBall += yMoveSpeed;
     }
-
-   setInterval(draw,10); // using the draw function every 10 milliseconds 
     
+    function drawPaddle() {
+        privateContext.beginPath();
+        privateContext.rect(PLAY_PADDLE, GAME_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT);
+        privateContext.fillStyle = "orange";
+        privateContext.fill();
+        privateContext.closePath();
+    }
+    
+  
 	return {
 		init: publicInit
 	};
