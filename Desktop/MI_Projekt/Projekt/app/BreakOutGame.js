@@ -19,6 +19,10 @@ var breakOutGame = (function () {
 	var BRICK_COLUMNS = 13;
     var BRICK_WIDTH = 40;
 	var BRICK_HEIGHT = 10;
+    var BRICK_GAP_TOP = 5;
+    var BRICK_GAP_LEFT = 5;
+    var BRICK_PADDING = 5;
+
     
     var PADDLE_HEIGHT = 10;
     var PADDLE_WIDTH = 70;
@@ -46,6 +50,26 @@ var breakOutGame = (function () {
         setInterval(privateDraw,10); // using the draw function every 10 milliseconds 
 	}
 */
+    for(var c = 0; c < BRICK_COLUMNS; c++) {            // creating bricks which have x- and yPositions
+        bricks[c] = [];
+        for(r = 0; r < BRICK_ROWS; r++) {
+            bricks[c][r] = {x: 0, y: 0}; 
+        }
+    }
+    
+    function drawBricks() {
+        for(c = 0; c < BRICK_COLUMNS; c++) {
+            for(r = 0; r < BRICK_ROWS; r++) {
+                bricks[c][r].x = 0;
+                bricks[c][r].y = 0;
+                privateContext.beginPath();
+                privateContext.rect(0, 0, BRICK_WIDTH, BRICK_HEIGHT);
+                privateContext.fillStyle = "1E90FF";
+                privateContext.fill();
+                privateContext.closePath();
+            }
+        }
+    }
     
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
